@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+<meta name="viewport" content="width=320; user-scalable=no" />
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<title>Minimal AppLaud App</title>
+ 
+<script type="text/javascript" charset="utf-8" src="cordova-2.3.0.js"></script>
+<script type="text/javascript" charset="utf-8">
+var fileSystem;
+ 
+//generic getById
+function getById(id) {
+    return document.querySelector(id);
+}
+//generic content logger
+function logit(s) {
+    getById("#content").innerHTML += s;
+}
+ 
+//generic error handler
+function onError(e) {
+    getById("#content").innerHTML = "<h2>Error</h2>"+e.toString();
+}
+ 
+function doDeleteFile(e) {
+    fileSystem.root.getFile("db.txt", {create:true}, function(f) {
+        f.remove(function() {
+            logit("File removed<p/>");
+        });
+    }, onError);
+}
+ 
+function metadataFile(m) {
+    logit("File was last modified "+m.modificationTime+"<p/>");   
+}
+ 
+function doMetadataFile(e) {
+    fileSystem.root.getFile("db.txt", {create:true}, function(f) {
+        f.getMetadata(metadataFile,onError);
+    }, onError);
+}
+
+function readFile(f) {
+    reader = new FileReader();
+    reader.onloadend = function(e) {
+        console.log("go to end");
+        logit("<pre>" + e.target.result + "</pre><p/>");
+        alert(e.target.result);
+    }
+    reader.readAsText(f);
+}
+
+function doReadFile(e) {
+    fileSystem.root.getFile("db.txt", {create:true}, readFile, onError);
+}
+ 
+//function doReadFile(e) {
+	
+function appendFile(f) {
+ 
+    f.createWriter(function(writerOb) {
+        writerOb.onwrite=function() {
+            logit("Done writing to file.<p/>");
+        }
+        //go to the end of the file...
+        writerOb.seek(writerOb.length);
+        writerOb.write("Test at "+new Date().toString() + "\n");
+    })
+ 
+}
+ 
+function doAppendFile(e) {
+    fileSystem.root.getFile("db.txt", {create:true}, appendFile, onError);
+}
+ 
+function gotFiles(entries) {
+    var s = "";
+    for(var i=0,len=entries.length; i<len; i++) {
+        //entry objects include: isFile, isDirectory, name, fullPath
+        s+= entries[i].fullPath;
+        if (entries[i].isFile) {
+            s += " [F]";
+        }
+        else {
+            s += " [D]";
+        }
+        s += "<br/>";
+         
+    }
+    s+="<p/>";
+    logit(s);
+}
+ 
+function doDirectoryListing(e) {
+    //get a directory reader from our FS
+    var dirReader = fileSystem.root.createReader();
+    //alert("here in dir listing");
+ 
+    dirReader.readEntries(gotFiles,onError);       
+}
+ 
+function onFSSuccess(fs) {
+    fileSystem = fs;
+ 
+    //alert("here in on fssuccess");
+    getById("#dirListingButton").addEventListener("touchstart",doDirectoryListing);           
+    getById("#addFileButton").addEventListener("touchstart",doAppendFile);           
+    getById("#readFileButton").addEventListener("touchstart",doReadFile);           
+    getById("#metadataFileButton").addEventListener("touchstart",doMetadataFile);           
+    getById("#deleteFileButton").addEventListener("touchstart",doDeleteFile);           
+     
+    logit( "Got the file system: "+fileSystem.name +"<br/>" +
+                                    "root entry name is "+fileSystem.root.name + "<p/>")   
+ 
+    //doDirectoryListing();
+}
+ 
+function onDeviceReady() {
+ 	//alert("here in ready");
+    //request the persistent file system
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onFSSuccess, onError);
+     
+}
+ 
+function init() {
+	//alert("here in init");
+    //document.addEventListener("deviceready", onDeviceReady, false);
+}
+
+function onSubmit() {
+	//alert("on submit");
+	//window.location.assign("try.html");
+	//getById("#content").innerHTML = s;
+	//window.location.href="try.html";
+	window.open("db.txt");
+}
+
+</script>
+ 
+<style>
+button { width: 100%; padding: 5px; }
+</style>
+</head>
+ 
+<body onload="init();" id="stage" class="theme">
+<p id="exam_name"></p>
+
+<script>
+str = "CT abdomen and pelvis";
+document.getElementById("exam_name").innerHTML=str;
+</script>
+
+<p id="
+
+<!---
+<button id="addFileButton">Create/Append to Test File</button>
+<button id="readFileButton">Read Test File</button>
+<button id="metadataFileButton">Get Test File Metadata</button>
+<button id="deleteFileButton">Delete Test File</button>
+<button id="dirListingButton">Show Directory Contents</button>
+--->
+ 
+<div id="content"></div>
+ 
+<!---
+<a href="#" class="btn" onclick="doReadFile();">Scan Code</a>
+--->
+
+<!--a href="db.txt">click here to jump</a--->
+<!--
+<form method="post">
+Patient History: <input type="text" name="hist"><br>
+Patient Diagnose: <input type="text" name="diag"><br>
+<input type="submit" value = "OK" onClick = "onSubmit()">
+<input type = "reset" value = "reset">
+</form>
+-->
+
+ 
+</body>
+</html>

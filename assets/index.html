@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <title>PhoneGap</title>
+  <script type="text/javascript" charset="utf-8" src="cordova-1.5.0.js"></script>
+ </head>
+ <!----
+ <body>
+    <h1>Hello PhoneGap</h1>
+ </body>
+ <body>
+ 	<h2>Another Hello</h2>
+ 	<button type="button" onclick = "sendMessage">Click Me!</button>
+ </body>
+ ----->
+
+ <script type="text/javascript" charset="utf-8">
+
+    // Wait for PhoneGap to load
+    //
+    function onLoad() {
+    	//alert("into onload");
+        document.addEventListener("deviceready", onDeviceReady, false);
+    }
+
+    // PhoneGap is ready
+    //
+    function onDeviceReady() {
+    	alert("into on ready");
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+    }
+
+    function gotFS(fileSystem) {
+    	alert("into gotfs");
+        fileSystem.root.getFile("db", {create: true}, gotFileEntry, fail);
+    }
+
+    function gotFileEntry(fileEntry) {
+    	alert("into gotfileentry");
+        fileEntry.file(gotFile, fail);
+    }
+
+    function gotFile(file){
+    	alert("into got file");
+        //readDataUrl(file);
+        readAsText(file);
+    }
+
+    function readDataUrl(file) {
+        var reader = new FileReader();
+        reader.onloadend = function(evt) {
+            console.log("Read as data URL");
+            console.log(evt.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function readAsText(file) {
+    	alert("into readastext");
+        var reader = new FileReader();
+        reader.onloadend = function(evt) {
+			alert("into here");
+            console.log("Read as text");
+            console.log(evt.target.result);
+            logit("<pre>" + evt.target.result + "</pre><p/>");
+        };
+        reader.readAsText(file);
+		
+    }
+
+    function fail(evt) {
+        console.log(evt.target.error.code);
+    }
+
+ </script>
+ 
+ <body>
+ <button type="button" onclick="onDeviceReady()">Try it</button>
+ <form>
+ patient history: <input type = "text" name = "history"><br>
+ patient diagnose: <input type = "text" name = "fname"><br>
+ <input type = "submit" value = "Submit">
+ </form>
+ <textarea cols = "20" rows = "20" name = "tarea">
+ Here shows the protocol result
+ </textarea>
+</html>
